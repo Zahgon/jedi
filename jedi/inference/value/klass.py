@@ -83,19 +83,7 @@ class ClassName(TreeNameDefinition):
 
     @property
     def api_type(self):
-        type_ = super().api_type
-        if type_ == 'function':
-            definition = self.tree_name.get_definition()
-            if definition is None:
-                return type_
-            if function_is_property(definition):
-                # This essentially checks if there is an @property before
-                # the function. @property could be something different, but
-                # any programmer that redefines property as something that
-                # is not really a property anymore, should be shot. (i.e.
-                # this is a heuristic).
-                return 'property'
-        return type_
+        pass
 
 
 class ClassFilter(ParserTreeFilter):
@@ -216,7 +204,7 @@ class ClassMixin:
 
     @property
     def name(self):
-        return ValueName(self, self.tree_node.name)
+        pass
 
     def py__name__(self):
         return self.name.string_name
@@ -377,9 +365,7 @@ class ClassMixin:
         return ClassContext(self)
 
     def get_type_hint(self, add_class_info=True):
-        if add_class_info:
-            return 'Type[%s]' % self.py__name__()
-        return self.py__name__()
+        pass
 
     @inference_state_method_cache(default=False)
     def is_typeddict(self):
@@ -523,16 +509,7 @@ class DataclassDecorator(ValueWrapper, FunctionMixin):
         )
 
     def _init_param_value(self, arguments) -> Optional[bool]:
-        if not arguments.argument_node:
-            return None
-
-        arg_nodes = (
-            arguments.argument_node.children
-            if arguments.argument_node.type == "arglist"
-            else [arguments.argument_node]
-        )
-
-        return init_param_value(arg_nodes)
+        pass
 
 
 class DataclassTransformer(ValueWrapper, ClassMixin):
@@ -572,7 +549,7 @@ class DataclassTransformer(ValueWrapper, ClassMixin):
     def init_mode_from_init_subclass(self) -> Optional[bool]:
         # def __init_subclass__(cls) -> None: ... is hardcoded in the typeshed
         # so the extra parameters can not be inferred.
-        return True
+        pass
 
 
 class DataclassWrapper(ValueWrapper, ClassMixin):

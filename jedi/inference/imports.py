@@ -128,25 +128,7 @@ def _level_to_base_import_path(project_path, directory, level):
     import .....foo), we can still try our best to help the user for
     completions.
     """
-    for i in range(level - 1):
-        old = directory
-        directory = os.path.dirname(directory)
-        if old == directory:
-            return None, None
-
-    d = directory
-    level_import_paths = []
-    # Now that we are on the level that the user wants to be, calculate the
-    # import path for it.
-    while True:
-        if d == project_path:
-            return level_import_paths, d
-        dir_name = os.path.basename(d)
-        if dir_name:
-            level_import_paths.insert(0, dir_name)
-            d = os.path.dirname(d)
-        else:
-            return None, directory
+    pass
 
 
 class Importer:
@@ -223,10 +205,7 @@ class Importer:
     @property
     def _str_import_path(self):
         """Returns the import path as pure strings instead of `Name`."""
-        return tuple(
-            name.value if isinstance(name, tree.Name) else name
-            for name in self.import_path
-        )
+        pass
 
     def _sys_path_with_modifications(self, is_completion):
         if self._fixed_sys_path is not None:

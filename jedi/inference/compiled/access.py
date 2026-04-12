@@ -102,12 +102,7 @@ SignatureParam = namedtuple(
 
 
 def shorten_repr(func):
-    def wrapper(self):
-        r = func(self)
-        if len(r) > 50:
-            r = r[:50] + '..'
-        return r
-    return wrapper
+    pass
 
 
 def create_access(inference_state, obj):
@@ -320,7 +315,7 @@ class DirectObjectAccess:
         return tuple(name.split('.'))
 
     def dir(self):
-        return dir(self._obj)
+        pass
 
     def has_iter(self):
         try:
@@ -415,9 +410,7 @@ class DirectObjectAccess:
         return get_api_type(self._obj)
 
     def get_array_type(self):
-        if isinstance(self._obj, dict):
-            return 'dict'
-        return None
+        pass
 
     def get_key_paths(self):
         def iter_partial_keys():

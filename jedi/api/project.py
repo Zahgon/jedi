@@ -31,20 +31,7 @@ _SERIALIZER_VERSION = 1
 
 
 def _try_to_skip_duplicates(func):
-    def wrapper(*args, **kwargs):
-        found_tree_nodes = []
-        found_modules = []
-        for definition in func(*args, **kwargs):
-            tree_node = definition._name.tree_name
-            if tree_node is not None and tree_node in found_tree_nodes:
-                continue
-            if definition.type == 'module' and definition.module_path is not None:
-                if definition.module_path in found_modules:
-                    continue
-                found_modules.append(definition.module_path)
-            yield definition
-            found_tree_nodes.append(tree_node)
-    return wrapper
+    pass
 
 
 def _remove_duplicates_from_path(path):
@@ -96,15 +83,7 @@ class Project:
         """
         Saves the project configuration in the project in ``.jedi/project.json``.
         """
-        data = dict(self.__dict__)
-        data.pop('_environment', None)
-        data.pop('_django', None)  # TODO make django setting public?
-        data = {k.lstrip('_'): v for k, v in data.items()}
-        data['path'] = str(data['path'])
-
-        self._get_config_folder_path(self._path).mkdir(parents=True, exist_ok=True)
-        with open(self._get_json_path(self._path), 'w') as f:
-            return json.dump((_SERIALIZER_VERSION, data), f)
+        pass
 
     def __init__(
         self,
@@ -156,7 +135,7 @@ class Project:
         """
         The base path for this project.
         """
-        return self._path
+        pass
 
     @property
     def sys_path(self):
@@ -164,7 +143,7 @@ class Project:
         The sys path provided to this project. This can be None and in that
         case will be auto generated.
         """
-        return self._sys_path
+        pass
 
     @property
     def smart_sys_path(self):
@@ -172,14 +151,14 @@ class Project:
         If the sys path is going to be calculated in a smart way, where
         additional paths are added.
         """
-        return self._smart_sys_path
+        pass
 
     @property
     def load_unsafe_extensions(self):
         """
         Wheter the project loads unsafe extensions.
         """
-        return self._load_unsafe_extensions
+        pass
 
     @inference_state_as_method_param_cache()
     def _get_base_sys_path(self, inference_state):
@@ -240,12 +219,7 @@ class Project:
         return list(_remove_duplicates_from_path(path))
 
     def get_environment(self):
-        if self._environment is None:
-            if self._environment_path is not None:
-                self._environment = create_environment(self._environment_path, safe=False)
-            else:
-                self._environment = get_cached_default_environment()
-        return self._environment
+        pass
 
     def search(self, string, *, all_scopes=False):
         """
@@ -280,7 +254,7 @@ class Project:
             functions and classes.
         :yields: :class:`.Completion`
         """
-        return self._search_func(string, complete=True, **kwargs)
+        pass
 
     @_try_to_skip_duplicates
     def _search_func(self, string, complete=False, all_scopes=False):
@@ -371,22 +345,12 @@ class Project:
 
 
 def _is_potential_project(path):
-    for name in _CONTAINS_POTENTIAL_PROJECT:
-        try:
-            if path.joinpath(name).exists():
-                return True
-        except OSError:
-            continue
-    return False
+    pass
 
 
 def _is_django_path(directory):
     """ Detects the path of the very well known Django library (if used) """
-    try:
-        with open(directory.joinpath('manage.py'), 'rb') as f:
-            return b"DJANGO_SETTINGS_MODULE" in f.read()
-    except (FileNotFoundError, IsADirectoryError, PermissionError):
-        return False
+    pass
 
 
 def get_default_project(path=None):
@@ -399,46 +363,7 @@ def get_default_project(path=None):
     2. One of the following files: ``setup.py``, ``.git``, ``.hg``,
        ``requirements.txt`` and ``MANIFEST.in``.
     """
-    if path is None:
-        path = Path.cwd()
-    elif isinstance(path, str):
-        path = Path(path)
-
-    check = path.absolute()
-    probable_path = None
-    first_no_init_file = None
-    for dir in chain([check], check.parents):
-        try:
-            return Project.load(dir)
-        except (FileNotFoundError, IsADirectoryError, PermissionError):
-            pass
-        except NotADirectoryError:
-            continue
-
-        if first_no_init_file is None:
-            if dir.joinpath('__init__.py').exists():
-                # In the case that a __init__.py exists, it's in 99% just a
-                # Python package and the project sits at least one level above.
-                continue
-            elif not dir.is_file():
-                first_no_init_file = dir
-
-        if _is_django_path(dir):
-            project = Project(dir)
-            project._django = True
-            return project
-
-        if probable_path is None and _is_potential_project(dir):
-            probable_path = dir
-
-    if probable_path is not None:
-        return Project(probable_path)
-
-    if first_no_init_file is not None:
-        return Project(first_no_init_file)
-
-    curdir = path if path.is_dir() else path.parent
-    return Project(curdir)
+    pass
 
 
 def _remove_imports(names):

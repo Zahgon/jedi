@@ -22,8 +22,7 @@ def load_module(inference_state, **kwargs):
 
 
 def get_compiled_method_return(inference_state, id, attribute, *args, **kwargs):
-    handle = inference_state.compiled_subprocess.get_access_handle(id)
-    return getattr(handle.access, attribute)(*args, **kwargs)
+    pass
 
 
 def create_simple_object(inference_state, obj):
@@ -60,12 +59,7 @@ def _test_print(inference_state, stderr=None, stdout=None):
     """
     Force some prints in the subprocesses. This exists for unit tests.
     """
-    if stderr is not None:
-        print(stderr, file=sys.stderr)
-        sys.stderr.flush()
-    if stdout is not None:
-        print(stdout)
-        sys.stdout.flush()
+    pass
 
 
 def _get_init_path(directory_path):
@@ -73,11 +67,7 @@ def _get_init_path(directory_path):
     The __init__ file can be searched in a directory. If found return it, else
     None.
     """
-    for suffix in all_suffixes():
-        path = os.path.join(directory_path, '__init__' + suffix)
-        if os.path.exists(path):
-            return path
-    return None
+    pass
 
 
 def safe_literal_eval(inference_state, value):

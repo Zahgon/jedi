@@ -142,7 +142,7 @@ class AbstractContext:
 
     @property
     def name(self):
-        return None
+        pass
 
     def get_qualified_names(self):
         return ()
@@ -170,11 +170,11 @@ class ValueContext(AbstractContext):
 
     @property
     def tree_node(self):
-        return self._value.tree_node
+        pass
 
     @property
     def parent_context(self):
-        return self._value.parent_context
+        pass
 
     def is_module(self):
         return self._value.is_module()
@@ -202,7 +202,7 @@ class ValueContext(AbstractContext):
 
     @property
     def name(self):
-        return self._value.name
+        pass
 
     def get_qualified_names(self):
         return self._value.get_qualified_names()
@@ -330,11 +330,11 @@ class ModuleContext(TreeContextMixin, ValueContext):
 
     @property
     def string_names(self):
-        return self._value.string_names
+        pass
 
     @property
     def code_lines(self):
-        return self._value.code_lines
+        pass
 
     def get_value(self):
         """
@@ -354,7 +354,7 @@ class NamespaceContext(TreeContextMixin, ValueContext):
 
     @property
     def string_names(self):
-        return self._value.string_names
+        pass
 
     def py__file__(self) -> Optional[Path]:
         return self._value.py__file__()  # type: ignore[no-any-return]
@@ -404,7 +404,7 @@ class CompiledModuleContext(CompiledContext):
 
     @property
     def string_names(self):
-        return self._value.string_names
+        pass
 
     def py__file__(self) -> Optional[Path]:
         return self._value.py__file__()  # type: ignore[no-any-return]

@@ -51,19 +51,19 @@ class GeneratorBase(LazyAttributeOverwrite, IterableMixin):
 
     @publish_method('__iter__')
     def _iter(self, arguments):
-        return ValueSet([self])
+        pass
 
     @publish_method('send')
     @publish_method('__next__')
     def _next(self, arguments):
-        return ValueSet.from_sets(lazy_value.infer() for lazy_value in self.py__iter__())
+        pass
 
     def py__stop_iteration_returns(self):
         return ValueSet([compiled.builtin_from_name(self.inference_state, 'None')])
 
     @property
     def name(self):
-        return compiled.CompiledValueName(self, 'Generator')
+        pass
 
     def get_annotated_class_object(self):
         from jedi.inference.gradual.generics import TupleGenericManager
@@ -185,7 +185,7 @@ class Sequence(LazyAttributeOverwrite, IterableMixin):
 
     @property
     def name(self):
-        return compiled.CompiledValueName(self, self.array_type)
+        pass
 
     def _get_generics(self):
         return (self.merge_types_of_iterate().py__class__(),)
@@ -289,23 +289,11 @@ class DictComprehension(ComprehensionMixin, Sequence, _DictKeyMixin):
 
     @publish_method('values')
     def _imitate_values(self, arguments):
-        lazy_value = LazyKnownValues(self._dict_values())
-        return ValueSet([FakeList(self.inference_state, [lazy_value])])
+        pass
 
     @publish_method('items')
     def _imitate_items(self, arguments):
-        lazy_values = [
-            LazyKnownValue(
-                FakeTuple(
-                    self.inference_state,
-                    [LazyKnownValues(key),
-                     LazyKnownValues(value)]
-                )
-            )
-            for key, value in self._iterate()
-        ]
-
-        return ValueSet([FakeList(self.inference_state, lazy_values)])
+        pass
 
     def exact_key_items(self):
         # NOTE: A smarter thing can probably done here to achieve better
@@ -362,7 +350,7 @@ class SequenceLiteralValue(Sequence):
 
     def py__len__(self):
         # This function is not really used often. It's more of a try.
-        return len(self.get_tree_entries())
+        pass
 
     def get_tree_entries(self):
         c = self.atom.children
@@ -449,20 +437,11 @@ class DictLiteralValue(_DictMixin, SequenceLiteralValue, _DictKeyMixin):
 
     @publish_method('values')
     def _imitate_values(self, arguments):
-        lazy_value = LazyKnownValues(self._dict_values())
-        return ValueSet([FakeList(self.inference_state, [lazy_value])])
+        pass
 
     @publish_method('items')
     def _imitate_items(self, arguments):
-        lazy_values = [
-            LazyKnownValue(FakeTuple(
-                self.inference_state,
-                (LazyTreeValue(self._defining_context, key_node),
-                 LazyTreeValue(self._defining_context, value_node))
-            )) for key_node, value_node in self.get_tree_entries()
-        ]
-
-        return ValueSet([FakeList(self.inference_state, lazy_values)])
+        pass
 
     def exact_key_items(self):
         """
@@ -539,10 +518,7 @@ class FakeDict(_DictMixin, Sequence, _DictKeyMixin):
 
     @publish_method('values')
     def _values(self, arguments):
-        return ValueSet([FakeTuple(
-            self.inference_state,
-            [LazyKnownValues(self._dict_values())]
-        )])
+        pass
 
     def _dict_values(self):
         return ValueSet.from_sets(lazy_value.infer() for lazy_value in self._dct.values())

@@ -55,10 +55,7 @@ class MixedModuleContext(ModuleContext):
         ]
 
     def _get_mixed_object(self, compiled_value):
-        return mixed.MixedObject(
-            compiled_value=compiled_value,
-            tree_value=self._value
-        )
+        pass
 
     def get_filters(self, until_position=None, origin_scope=None):
         yield MergedFilter(

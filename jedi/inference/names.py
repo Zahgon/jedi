@@ -77,7 +77,7 @@ class AbstractNameDefinition:
 
     @property
     def api_type(self):
-        return self.parent_context.api_type
+        pass
 
     def get_defining_qualified_value(self):
         """
@@ -214,11 +214,11 @@ class AbstractTreeName(AbstractNameDefinition):
 
     @property
     def string_name(self):
-        return self.tree_name.value
+        pass
 
     @property
     def start_pos(self):
-        return self.tree_name.start_pos
+        pass
 
 
 class ValueNameMixin:
@@ -250,7 +250,7 @@ class ValueNameMixin:
 
     @property
     def api_type(self):
-        return self._value.api_type
+        pass
 
 
 class ValueName(ValueNameMixin, AbstractTreeName):
@@ -282,10 +282,7 @@ class TreeNameDefinition(AbstractTreeName):
 
     @property
     def api_type(self):
-        definition = self.tree_name.get_definition(import_name_always=True)
-        if definition is None:
-            return 'statement'
-        return self._API_TYPES.get(definition.type, 'statement')
+        pass
 
     def assignment_indexes(self):
         """
@@ -331,7 +328,7 @@ class TreeNameDefinition(AbstractTreeName):
     @property
     def inference_state(self):
         # Used by the cache function below
-        return self.parent_context.inference_state
+        pass
 
     @inference_state_method_cache(default='')
     def py__doc__(self):
@@ -403,15 +400,10 @@ class ParamNameInterface(_ParamMixin):
 
     @property
     def star_count(self):
-        kind = self.get_kind()
-        if kind == Parameter.VAR_POSITIONAL:
-            return 1
-        if kind == Parameter.VAR_KEYWORD:
-            return 2
-        return 0
+        pass
 
     def infer_default(self):
-        return NO_VALUES
+        pass
 
 
 class BaseTreeParamName(ParamNameInterface, AbstractTreeName):
@@ -451,7 +443,7 @@ class _ActualTreeParamName(BaseTreeParamName):
 
     @property
     def annotation_node(self):
-        return self._get_param_node().annotation
+        pass
 
     def infer_annotation(self, execute_annotation=True, ignore_stars=False):
         from jedi.inference.gradual.annotation import infer_param
@@ -463,14 +455,11 @@ class _ActualTreeParamName(BaseTreeParamName):
         return values
 
     def infer_default(self):
-        node = self.default_node
-        if node is None:
-            return NO_VALUES
-        return self.parent_context.infer_node(node)
+        pass
 
     @property
     def default_node(self):
-        return self._get_param_node().default
+        pass
 
     def get_kind(self):
         tree_param = self._get_param_node()
@@ -588,13 +577,7 @@ class ImportName(AbstractNameDefinition):
 
     @property
     def parent_context(self):
-        m = self._from_module_context
-        import_values = self.infer()
-        if not import_values:
-            return m
-        # It's almost always possible to find the import or to not find it. The
-        # importing returns only one value, pretty much always.
-        return next(iter(import_values)).as_context()
+        pass
 
     @memoize_method
     def infer(self):
@@ -607,7 +590,7 @@ class ImportName(AbstractNameDefinition):
 
     @property
     def api_type(self):
-        return 'module'
+        pass
 
     def py__doc__(self):
         return _merge_name_docs(self.goto())
@@ -666,7 +649,7 @@ class ModuleName(ValueNameMixin, AbstractNameDefinition):
 
     @property
     def string_name(self):
-        return self._name
+        pass
 
 
 class StubModuleName(StubNameMixin, ModuleName):

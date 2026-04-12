@@ -13,13 +13,13 @@ del _sep
 
 def to_list(func):
     def wrapper(*args, **kwargs):
-        return list(func(*args, **kwargs))
+        pass
     return wrapper
 
 
 def to_tuple(func):
     def wrapper(*args, **kwargs):
-        return tuple(func(*args, **kwargs))
+        pass
     return wrapper
 
 
@@ -41,7 +41,7 @@ class UncaughtAttributeError(Exception):
 
 
 def safe_property(func):
-    return property(reraise_uncaught(func))
+    pass
 
 
 def reraise_uncaught(func):
@@ -61,13 +61,7 @@ def reraise_uncaught(func):
     `AttributeError` to `UncaughtAttributeError` to avoid unexpected catch.
     This helps us noticing bugs earlier and facilitates debugging.
     """
-    @functools.wraps(func)
-    def wrapper(*args, **kwds):
-        try:
-            return func(*args, **kwds)
-        except AttributeError as e:
-            raise UncaughtAttributeError(e) from e
-    return wrapper
+    pass
 
 
 class PushBackIterator:

@@ -107,46 +107,13 @@ _NAMEDTUPLE_FIELD_TEMPLATE = '''\
 
 def execute(callback):
     def wrapper(value, arguments):
-        def call():
-            return callback(value, arguments=arguments)
-
-        try:
-            obj_name = value.name.string_name
-        except AttributeError:
-            pass
-        else:
-            p = value.parent_context
-            if p is not None and p.is_builtins_module():
-                module_name = 'builtins'
-            elif p is not None and p.is_module():
-                module_name = p.py__name__()
-            else:
-                return call()
-
-            if value.is_bound_method() or value.is_instance():
-                # value can be an instance for example if it is a partial
-                # object.
-                return call()
-
-            # for now we just support builtin functions.
-            try:
-                func = _implemented[module_name][obj_name]
-            except KeyError:
-                pass
-            else:
-                return func(value, arguments=arguments, callback=call)
-        return call()
+        pass
 
     return wrapper
 
 
 def _follow_param(inference_state, arguments, index):
-    try:
-        key, lazy_value = list(arguments.unpack())[index]
-    except IndexError:
-        return NO_VALUES
-    else:
-        return lazy_value.infer()
+    pass
 
 
 def argument_clinic(clinic_string, want_value=False, want_context=False,
@@ -157,30 +124,7 @@ def argument_clinic(clinic_string, want_value=False, want_context=False,
     """
 
     def f(func):
-        def wrapper(value, arguments, callback):
-            try:
-                args = tuple(iterate_argument_clinic(
-                    value.inference_state, arguments, clinic_string))
-            except ParamIssue:
-                return NO_VALUES
-
-            debug.dbg('builtin start %s' % value, color='MAGENTA')
-            kwargs = {}
-            if want_context:
-                kwargs['context'] = arguments.context
-            if want_value:
-                kwargs['value'] = value
-            if want_inference_state:
-                kwargs['inference_state'] = value.inference_state
-            if want_arguments:
-                kwargs['arguments'] = arguments
-            if want_callback:
-                kwargs['callback'] = callback
-            result = func(*args, **kwargs)
-            debug.dbg('builtin end: %s', result, color='MAGENTA')
-            return result
-
-        return wrapper
+        pass
     return f
 
 
@@ -188,36 +132,24 @@ def argument_clinic(clinic_string, want_value=False, want_context=False,
 def builtins_next(iterators, defaults, inference_state):
     # TODO theoretically we have to check here if something is an iterator.
     # That is probably done by checking if it's not a class.
-    return defaults | iterators.py__getattribute__('__next__').execute_with_values()
+    pass
 
 
 @argument_clinic('iterator[, default], /')
 def builtins_iter(iterators_or_callables, defaults):
     # TODO implement this if it's a callable.
-    return iterators_or_callables.py__getattribute__('__iter__').execute_with_values()
+    pass
 
 
 @argument_clinic('object, name[, default], /')
 def builtins_getattr(objects, names, defaults=None):
     # follow the first param
-    for value in objects:
-        for name in names:
-            string = get_str_or_none(name)
-            if string is None:
-                debug.warning('getattr called without str')
-                continue
-            else:
-                return value.py__getattribute__(string)
-    return NO_VALUES
+    pass
 
 
 @argument_clinic('object[, bases, dict], /')
 def builtins_type(objects, bases, dicts):
-    if bases or dicts:
-        # It's a type creation... maybe someday...
-        return NO_VALUES
-    else:
-        return objects.py__class__()
+    pass
 
 
 class SuperInstance(LazyValueWrapper):
@@ -246,14 +178,7 @@ class SuperInstance(LazyValueWrapper):
 
 @argument_clinic('[type[, value]], /', want_context=True)
 def builtins_super(types, objects, context):
-    instance = None
-    if isinstance(context, AnonymousMethodExecutionContext):
-        instance = context.instance
-    elif isinstance(context, MethodExecutionContext):
-        instance = context.instance
-    if instance is None:
-        return NO_VALUES
-    return ValueSet({SuperInstance(instance.inference_state, instance)})
+    pass
 
 
 class ReversedObject(AttributeOverwrite):
@@ -266,9 +191,7 @@ class ReversedObject(AttributeOverwrite):
 
     @publish_method('__next__')
     def _next(self, arguments):
-        return ValueSet.from_sets(
-            lazy_value.infer() for lazy_value in self._iter_list
-        )
+        pass
 
 
 @argument_clinic('sequence, /', want_value=True, want_arguments=True)
@@ -276,60 +199,12 @@ def builtins_reversed(sequences, value, arguments):
     # While we could do without this variable (just by using sequences), we
     # want static analysis to work well. Therefore we need to generated the
     # values again.
-    key, lazy_value = next(arguments.unpack())
-    cn = None
-    if isinstance(lazy_value, LazyTreeValue):
-        cn = ContextualizedNode(lazy_value.context, lazy_value.data)
-    ordered = list(sequences.iterate(cn))
-
-    # Repack iterator values and then run it the normal way. This is
-    # necessary, because `reversed` is a function and autocompletion
-    # would fail in certain cases like `reversed(x).__iter__` if we
-    # just returned the result directly.
-    seq, = value.inference_state.typing_module.py__getattribute__('Iterator').execute_with_values()
-    return ValueSet([ReversedObject(seq, list(reversed(ordered)))])
+    pass
 
 
 @argument_clinic('value, type, /', want_arguments=True, want_inference_state=True)
 def builtins_isinstance(objects, types, arguments, inference_state):
-    bool_results = set()
-    for o in objects:
-        cls = o.py__class__()
-        try:
-            cls.py__bases__
-        except AttributeError:
-            # This is temporary. Everything should have a class attribute in
-            # Python?! Maybe we'll leave it here, because some numpy objects or
-            # whatever might not.
-            bool_results = set([True, False])
-            break
-
-        mro = list(cls.py__mro__())
-
-        for cls_or_tup in types:
-            if cls_or_tup.is_class():
-                bool_results.add(cls_or_tup in mro)
-            elif cls_or_tup.name.string_name == 'tuple' \
-                    and cls_or_tup.get_root_context().is_builtins_module():
-                # Check for tuples.
-                classes = ValueSet.from_sets(
-                    lazy_value.infer()
-                    for lazy_value in cls_or_tup.iterate()
-                )
-                bool_results.add(any(cls in mro for cls in classes))
-            else:
-                _, lazy_value = list(arguments.unpack())[1]
-                if isinstance(lazy_value, LazyTreeValue):
-                    node = lazy_value.data
-                    message = 'TypeError: isinstance() arg 2 must be a ' \
-                              'class, type, or tuple of classes and types, ' \
-                              'not %s.' % cls_or_tup
-                    analysis.add(lazy_value.context, 'type-error-isinstance', node, message)
-
-    return ValueSet(
-        compiled.builtin_from_name(inference_state, str(b))
-        for b in bool_results
-    )
+    pass
 
 
 class StaticMethodObject(ValueWrapper):
@@ -339,7 +214,7 @@ class StaticMethodObject(ValueWrapper):
 
 @argument_clinic('sequence, /')
 def builtins_staticmethod(functions):
-    return ValueSet(StaticMethodObject(f) for f in functions)
+    pass
 
 
 class ClassMethodObject(ValueWrapper):
@@ -380,11 +255,7 @@ class ClassMethodArguments(TreeArgumentsWrapper):
 
 @argument_clinic('sequence, /', want_value=True, want_arguments=True)
 def builtins_classmethod(functions, value, arguments):
-    return ValueSet(
-        ClassMethodObject(class_method_object, function)
-        for class_method_object in value.py__call__(arguments=arguments)
-        for function in functions
-    )
+    pass
 
 
 class PropertyObject(AttributeOverwrite, ValueWrapper):
@@ -403,16 +274,12 @@ class PropertyObject(AttributeOverwrite, ValueWrapper):
     @publish_method('getter')
     @publish_method('setter')
     def _return_self(self, arguments):
-        return ValueSet({self})
+        pass
 
 
 @argument_clinic('func, /', want_callback=True)
 def builtins_property(functions, callback):
-    return ValueSet(
-        PropertyObject(property_value, function)
-        for property_value in callback()
-        for function in functions
-    )
+    pass
 
 
 def collections_namedtuple(value, arguments, callback):
@@ -423,54 +290,7 @@ def collections_namedtuple(value, arguments, callback):
     inferring the result.
 
     """
-    inference_state = value.inference_state
-
-    # Process arguments
-    name = 'jedi_unknown_namedtuple'
-    for c in _follow_param(inference_state, arguments, 0):
-        x = get_str_or_none(c)
-        if x is not None:
-            name = x
-            break
-
-    # TODO here we only use one of the types, we should use all.
-    param_values = _follow_param(inference_state, arguments, 1)
-    if not param_values:
-        return NO_VALUES
-    _fields = list(param_values)[0]
-    string = get_str_or_none(_fields)
-    if string is not None:
-        fields = string.replace(',', ' ').split()
-    elif isinstance(_fields, iterable.Sequence):
-        fields = [
-            get_str_or_none(v)
-            for lazy_value in _fields.py__iter__()
-            for v in lazy_value.infer()
-        ]
-        fields = [f for f in fields if f is not None]
-    else:
-        return NO_VALUES
-
-    # Build source code
-    code = _NAMEDTUPLE_CLASS_TEMPLATE.format(
-        typename=name,
-        field_names=tuple(fields),
-        num_fields=len(fields),
-        arg_list=repr(tuple(fields)).replace("'", "")[1:-1],
-        repr_fmt='',
-        field_defs='\n'.join(_NAMEDTUPLE_FIELD_TEMPLATE.format(index=index, name=name)
-                             for index, name in enumerate(fields))
-    )
-
-    # Parse source code
-    module = inference_state.grammar.parse(code)
-    generated_class = next(module.iter_classdefs())
-    parent_context = ModuleValue(
-        inference_state, module,
-        code_lines=parso.split_lines(code, keepends=True),
-    ).as_context()
-
-    return ValueSet([ClassValue(inference_state, parent_context, generated_class)])
+    pass
 
 
 class PartialObject(ValueWrapper):
@@ -567,31 +387,21 @@ class MergedPartialArguments(AbstractArguments):
 
 
 def functools_partial(value, arguments, callback):
-    return ValueSet(
-        PartialObject(instance, arguments)
-        for instance in value.py__call__(arguments)
-    )
+    pass
 
 
 def functools_partialmethod(value, arguments, callback):
-    return ValueSet(
-        PartialMethodObject(instance, arguments)
-        for instance in value.py__call__(arguments)
-    )
+    pass
 
 
 @argument_clinic('first, /')
 def _return_first_param(firsts):
-    return firsts
+    pass
 
 
 @argument_clinic('seq')
 def _random_choice(sequences):
-    return ValueSet.from_sets(
-        lazy_value.infer()
-        for sequence in sequences
-        for lazy_value in sequence.py__iter__()
-    )
+    pass
 
 
 def _dataclass(value, arguments, callback):
@@ -601,31 +411,7 @@ def _dataclass(value, arguments, callback):
     1. dataclass decorator declaration with parameters
     2. dataclass semantics on a class from a dataclass(-like) decorator
     """
-    for c in _follow_param(value.inference_state, arguments, 0):
-        if c.is_class():
-            # Declare dataclass semantics on a class from a dataclass decorator
-            should_generate_init = (
-                # Customized decorator, init may be disabled
-                value.init_param_mode
-                if isinstance(value, DataclassDecorator)
-                # Bare dataclass decorator, always with init mode
-                else True
-            )
-            return ValueSet([DataclassWrapper(c, should_generate_init)])
-        else:
-            # @dataclass(init=False)
-            # dataclass decorator customization
-            return ValueSet(
-                [
-                    DataclassDecorator(
-                        value,
-                        arguments=arguments,
-                        default_init=True,
-                    )
-                ]
-            )
-
-    return NO_VALUES
+    pass
 
 
 def _dataclass_transform(value, arguments, callback):
@@ -637,59 +423,7 @@ def _dataclass_transform(value, arguments, callback):
     3. dataclass-like decorator declaration with parameters
     4. dataclass-like semantics on a class from a dataclass-like decorator
     """
-    for c in _follow_param(value.inference_state, arguments, 0):
-        if c.is_class():
-            is_dataclass_transform = (
-                value.name.string_name == "dataclass_transform"
-                # The decorator function from dataclass_transform acting as the
-                # dataclass decorator.
-                and not isinstance(value, Decoratee)
-                # The decorator function from dataclass_transform acting as the
-                # dataclass decorator with customized parameters
-                and not isinstance(value, DataclassDecorator)
-            )
-
-            if is_dataclass_transform:
-                # Declare base class
-                return ValueSet([DataclassTransformer(c)])
-            else:
-                # Declare dataclass-like semantics on a class from a
-                # dataclass-like decorator
-                should_generate_init = value.init_param_mode
-                return ValueSet([DataclassWrapper(c, should_generate_init)])
-        elif c.is_function():
-            # dataclass-like decorator instantiation:
-            # @dataclass_transform
-            # def create_model()
-            return ValueSet(
-                [
-                    DataclassDecorator(
-                        value,
-                        arguments=arguments,
-                        default_init=True,
-                    )
-                ]
-            )
-        elif (
-            # @dataclass_transform
-            # def create_model(): pass
-            # @create_model(init=...)
-            isinstance(value, Decoratee)
-        ):
-            # dataclass (or like) decorator customization
-            return ValueSet(
-                [
-                    DataclassDecorator(
-                        value,
-                        arguments=arguments,
-                        default_init=value._wrapped_value.init_param_mode,
-                    )
-                ]
-            )
-        else:
-            # dataclass_transform decorator with parameters; nothing impactful
-            return ValueSet([value])
-    return NO_VALUES
+    pass
 
 
 class ItemGetterCallable(ValueWrapper):
@@ -718,7 +452,7 @@ class ItemGetterCallable(ValueWrapper):
 
 @argument_clinic('func, /')
 def _functools_wraps(funcs):
-    return ValueSet(WrapsCallable(func) for func in funcs)
+    pass
 
 
 class WrapsCallable(ValueWrapper):
@@ -737,7 +471,7 @@ class Wrapped(ValueWrapper, FunctionMixin):
 
     @property
     def name(self):
-        return self._original_function.name
+        pass
 
     def get_signature_functions(self):
         return [self]
@@ -745,48 +479,19 @@ class Wrapped(ValueWrapper, FunctionMixin):
 
 @argument_clinic('*args, /', want_value=True, want_arguments=True)
 def _operator_itemgetter(args_value_set, value, arguments):
-    return ValueSet([
-        ItemGetterCallable(instance, args_value_set)
-        for instance in value.py__call__(arguments)
-    ])
+    pass
 
 
 def _create_string_input_function(func):
     @argument_clinic('string, /', want_value=True, want_arguments=True)
     def wrapper(strings, value, arguments):
-        def iterate():
-            for value in strings:
-                s = get_str_or_none(value)
-                if s is not None:
-                    s = func(s)
-                    yield compiled.create_simple_object(value.inference_state, s)
-        values = ValueSet(iterate())
-        if values:
-            return values
-        return value.py__call__(arguments)
+        pass
     return wrapper
 
 
 @argument_clinic('*args, /', want_callback=True)
 def _os_path_join(args_set, callback):
-    if len(args_set) == 1:
-        string = ''
-        sequence, = args_set
-        is_first = True
-        for lazy_value in sequence.py__iter__():
-            string_values = lazy_value.infer()
-            if len(string_values) != 1:
-                break
-            s = get_str_or_none(next(iter(string_values)))
-            if s is None:
-                break
-            if not is_first:
-                string += os.path.sep
-            string += s
-            is_first = False
-        else:
-            return ValueSet([compiled.create_simple_object(sequence.inference_state, string)])
-    return callback()
+    pass
 
 
 _implemented = {
@@ -862,15 +567,7 @@ _implemented = {
 
 def get_metaclass_filters(func):
     def wrapper(cls, metaclasses, is_instance):
-        for metaclass in metaclasses:
-            if metaclass.py__name__() == 'EnumMeta' \
-                    and metaclass.get_root_context().py__name__() == 'enum':
-                filter_ = ParserTreeFilter(parent_context=cls.as_context())
-                return [DictFilter({
-                    name.string_name: EnumInstance(cls, name).name
-                    for name in filter_.values()
-                })]
-        return func(cls, metaclasses, is_instance)
+        pass
     return wrapper
 
 
@@ -883,7 +580,7 @@ class EnumInstance(LazyValueWrapper):
 
     @safe_property
     def name(self):
-        return ValueName(self, self._name.tree_name)
+        pass
 
     def _get_wrapped_value(self):
         n = self._name.string_name
@@ -908,9 +605,5 @@ class EnumInstance(LazyValueWrapper):
 
 def tree_name_to_values(func):
     def wrapper(inference_state, context, tree_name):
-        if tree_name.value == 'sep' and context.is_module() and context.py__name__() == 'os.path':
-            return ValueSet({
-                compiled.create_simple_object(inference_state, os.path.sep),
-            })
-        return func(inference_state, context, tree_name)
+        pass
     return wrapper

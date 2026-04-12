@@ -51,17 +51,7 @@ def sorted_definitions(defs):
 
 
 def get_on_completion_name(module_node, lines, position):
-    leaf = module_node.get_leaf_for_position(position)
-    if leaf is None or leaf.type in ('string', 'error_leaf'):
-        # Completions inside strings are a bit special, we need to parse the
-        # string. The same is true for comments and error_leafs.
-        line = lines[position[0] - 1]
-        # The first step of completions is to get the name
-        return re.search(r'(?!\d)\w+$|$', line[:position[1]]).group(0)
-    elif leaf.type not in ('name', 'keyword'):
-        return ''
-
-    return leaf.value[:position[1] - leaf.start_pos[1]]
+    pass
 
 
 def _get_code(code_lines, start_pos, end_pos):
@@ -77,7 +67,7 @@ def _get_code(code_lines, start_pos, end_pos):
 class OnErrorLeaf(Exception):
     @property
     def error_leaf(self):
-        return self.args[0]
+        pass
 
 
 def _get_code_for_stack(code_lines, leaf, position):
@@ -215,7 +205,7 @@ class CallDetails:
 
     @property
     def keyword_name_str(self):
-        return _get_index_and_key(self._children, self._position)[1]
+        pass
 
     @memoize_method
     def _list_arguments(self):
@@ -467,25 +457,7 @@ def cache_signatures(inference_state, context, bracket_leaf, code_lines, user_po
 
 def validate_line_column(func):
     @wraps(func)
-    def wrapper(self, line=None, column=None, *args, **kwargs):
-        line = max(len(self._code_lines), 1) if line is None else line
-        if not (0 < line <= len(self._code_lines)):
-            raise ValueError('`line` parameter is not in a valid range.')
-
-        line_string = self._code_lines[line - 1]
-        line_len = len(line_string)
-        if line_string.endswith('\r\n'):
-            line_len -= 2
-        elif line_string.endswith('\n'):
-            line_len -= 1
-
-        column = line_len if column is None else column
-        if not (0 <= column <= line_len):
-            raise ValueError('`column` parameter (%d) is not in a valid range '
-                             '(0-%d) for line %d (%r).' % (
-                                 column, line_len, line, line_string))
-        return func(self, line, column, *args, **kwargs)
-    return wrapper
+    pass
 
 
 def get_module_names(module, all_scopes, definitions=True, references=False):
@@ -494,8 +466,7 @@ def get_module_names(module, all_scopes, definitions=True, references=False):
     values.
     """
     def def_ref_filter(name):
-        is_def = name.is_definition()
-        return definitions and is_def or references and not is_def
+        pass
 
     names = list(chain.from_iterable(module.get_used_names().values()))
     if not all_scopes:

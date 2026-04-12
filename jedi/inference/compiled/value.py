@@ -150,7 +150,7 @@ class CompiledValue(Value):
 
     @property
     def api_type(self):
-        return self.access_handle.get_api_type()
+        pass
 
     def get_filters(self, is_instance=False, origin_scope=None):
         yield self._ensure_one_filter(is_instance)
@@ -201,10 +201,7 @@ class CompiledValue(Value):
 
     @property
     def name(self):
-        name = self.py__name__()
-        if name is None:
-            name = self.access_handle.get_repr()
-        return CompiledValueName(self, name)
+        pass
 
     def _execute_function(self, params):
         from jedi.inference import docstrings
@@ -274,7 +271,7 @@ class CompiledValue(Value):
 
     @property
     def array_type(self):
-        return self.access_handle.get_array_type()
+        pass
 
     def get_key_values(self):
         return [
@@ -283,9 +280,7 @@ class CompiledValue(Value):
         ]
 
     def get_type_hint(self, add_class_info=True):
-        if self.access_handle.get_repr() in ('None', "<class 'NoneType'>"):
-            return 'None'
-        return None
+        pass
 
 
 class CompiledModule(CompiledValue):
@@ -303,10 +298,7 @@ class CompiledModule(CompiledValue):
     @property
     def string_names(self):
         # For modules
-        name = self.py__name__()
-        if name is None:
-            return ()
-        return tuple(name.split('.'))
+        pass
 
     def py__file__(self) -> Optional[Path]:
         return self.access_handle.py__file__()  # type: ignore[no-any-return]
@@ -345,12 +337,7 @@ class CompiledName(AbstractNameDefinition):
 
     @property
     def api_type(self):
-        if self.is_descriptor:
-            # In case of properties we want to avoid executions as much as
-            # possible. Since the api_type can be wrong for other reasons
-            # anyway, we just return instance here.
-            return "instance"
-        return self.infer_compiled_value().api_type
+        pass
 
     def infer(self):
         return ValueSet([self.infer_compiled_value()])
@@ -367,7 +354,7 @@ class SignatureParamName(ParamNameInterface, AbstractNameDefinition):
 
     @property
     def string_name(self):
-        return self._signature_param.name
+        pass
 
     def to_string(self):
         s = self._kind_string() + self.string_name
@@ -554,11 +541,7 @@ def _parse_function_doc(doc):
     else:
         # remove square brackets, that show an optional param ( = None)
         def change_options(m):
-            args = m.group(1).split(',')
-            for i, a in enumerate(args):
-                if a and '=' not in a:
-                    args[i] += '=None'
-            return ','.join(args)
+            pass
 
         while True:
             param_str, changes = re.subn(r' ?\[([^\[\]]+)\]',
@@ -599,9 +582,7 @@ def create_from_name(inference_state, compiled_value, name):
 
 def _normalize_create_args(func):
     """The cache doesn't care about keyword vs. normal args."""
-    def wrapper(inference_state, obj, parent_context=None):
-        return func(inference_state, obj, parent_context)
-    return wrapper
+    pass
 
 
 def create_from_access_path(inference_state, access_path):

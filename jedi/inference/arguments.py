@@ -16,19 +16,7 @@ from jedi.inference.cache import inference_state_as_method_param_cache
 
 def try_iter_content(types, depth=0):
     """Helper method for static analysis."""
-    if depth > 10:
-        # It's possible that a loop has references on itself (especially with
-        # CompiledValue). Therefore don't loop infinitely.
-        return
-
-    for typ in types:
-        try:
-            f = typ.py__iter__
-        except AttributeError:
-            pass
-        else:
-            for lazy_value in f():
-                try_iter_content(lazy_value.infer(), depth + 1)
+    pass
 
 
 class ParamIssue(Exception):
@@ -48,16 +36,7 @@ def repack_with_argument_clinic(clinic_string):
     """
     def decorator(func):
         def wrapper(value, arguments):
-            try:
-                args = tuple(iterate_argument_clinic(
-                    value.inference_state,
-                    arguments,
-                    clinic_string,
-                ))
-            except ParamIssue:
-                return NO_VALUES
-            else:
-                return func(value, *args)
+            pass
 
         return wrapper
     return decorator
@@ -284,15 +263,15 @@ class TreeArgumentsWrapper(_AbstractArgumentsMixin):
 
     @property
     def context(self):
-        return self._wrapped_arguments.context
+        pass
 
     @property
     def argument_node(self):
-        return self._wrapped_arguments.argument_node
+        pass
 
     @property
     def trailer(self):
-        return self._wrapped_arguments.trailer
+        pass
 
     def unpack(self, func=None):
         raise NotImplementedError

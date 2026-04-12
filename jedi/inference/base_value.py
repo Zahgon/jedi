@@ -272,7 +272,7 @@ class Value(HelperValueMixin):
         raise NotImplementedError
 
     def get_type_hint(self, add_class_info=True):
-        return None
+        pass
 
     def infer_type_vars(self, value_set):
         """
@@ -318,13 +318,7 @@ def iterate_values(values, contextualized_node=None, is_async=False):
 class _ValueWrapperBase(HelperValueMixin):
     @safe_property
     def name(self):
-        from jedi.inference.names import ValueName
-        wrapped_name = self._wrapped_value.name
-        if wrapped_name.tree_name is not None:
-            return ValueName(self, wrapped_name.tree_name)
-        else:
-            from jedi.inference.compiled import CompiledValueName
-            return CompiledValueName(self, wrapped_name.string_name)
+        pass
 
     @classmethod
     @inference_state_as_method_param_cache()
@@ -340,8 +334,7 @@ class LazyValueWrapper(_ValueWrapperBase):
     @safe_property
     @memoize_method
     def _wrapped_value(self):
-        with debug.increase_indent_cm('Resolve lazy value wrapper'):
-            return self._get_wrapped_value()
+        pass
 
     def __repr__(self):
         return '<%s>' % (self.__class__.__name__)
@@ -453,14 +446,11 @@ class ValueSet:
         return 'S{%s}' % (', '.join(str(s) for s in self._set))
 
     def filter(self, filter_func):
-        return self.__class__(filter(filter_func, self._set))
+        pass
 
     def __getattr__(self, name):
         def mapper(*args, **kwargs):
-            return self.from_sets(
-                getattr(value, name)(*args, **kwargs)
-                for value in self._set
-            )
+            pass
         return mapper
 
     def __eq__(self, other):
@@ -516,24 +506,7 @@ class ValueSet:
         return [sig for c in self._set for sig in c.get_signatures()]
 
     def get_type_hint(self, add_class_info=True):
-        t = [v.get_type_hint(add_class_info=add_class_info) for v in self._set]
-        type_hints = sorted(filter(None, t))
-        if len(type_hints) == 1:
-            return type_hints[0]
-
-        optional = 'None' in type_hints
-        if optional:
-            type_hints.remove('None')
-
-        if len(type_hints) == 0:
-            return None
-        elif len(type_hints) == 1:
-            s = type_hints[0]
-        else:
-            s = 'Union[%s]' % ', '.join(type_hints)
-        if optional:
-            s = 'Optional[%s]' % s
-        return s
+        pass
 
     def infer_type_vars(self, value_set):
         # Circular
@@ -552,7 +525,4 @@ NO_VALUES = ValueSet([])
 
 
 def iterator_to_value_set(func):
-    def wrapper(*args, **kwargs):
-        return ValueSet(func(*args, **kwargs))
-
-    return wrapper
+    pass

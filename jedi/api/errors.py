@@ -5,7 +5,7 @@ Jedi.
 
 
 def parso_to_jedi_errors(grammar, module_node):
-    return [SyntaxError(e) for e in grammar.iter_errors(module_node)]
+    pass
 
 
 class SyntaxError:
@@ -18,25 +18,25 @@ class SyntaxError:
     @property
     def line(self):
         """The line where the error starts (starting with 1)."""
-        return self._parso_error.start_pos[0]
+        pass
 
     @property
     def column(self):
         """The column where the error starts (starting with 0)."""
-        return self._parso_error.start_pos[1]
+        pass
 
     @property
     def until_line(self):
         """The line where the error ends (starting with 1)."""
-        return self._parso_error.end_pos[0]
+        pass
 
     @property
     def until_column(self):
         """The column where the error ends (starting with 0)."""
-        return self._parso_error.end_pos[1]
+        pass
 
     def get_message(self):
-        return self._parso_error.message
+        pass
 
     def __repr__(self):
         return '<%s from=%s to=%s>' % (

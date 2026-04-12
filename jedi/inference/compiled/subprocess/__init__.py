@@ -67,8 +67,7 @@ def _GeneralizedPopen(*args, **kwargs):
 
 
 def _enqueue_output(out, queue_):
-    for line in iter(out.readline, b''):
-        queue_.put(line)
+    pass
 
 
 def _add_stderr_to_debug(stderr_queue):
@@ -84,23 +83,11 @@ def _add_stderr_to_debug(stderr_queue):
 
 
 def _get_function(name):
-    return getattr(functions, name)
+    pass
 
 
 def _cleanup_process(process, thread):
-    try:
-        process.kill()
-        process.wait()
-    except OSError:
-        # Raised if the process is already killed.
-        pass
-    thread.join()
-    for stream in [process.stdin, process.stdout, process.stderr]:
-        try:
-            stream.close()
-        except OSError:
-            # Raised if the stream is broken.
-            pass
+    pass
 
 
 class _InferenceStateProcess:
@@ -183,38 +170,12 @@ class InferenceStateSubprocess(_InferenceStateProcess):
         func = _get_function(name)
 
         def wrapper(*args, **kwargs):
-            self._used = True
-
-            result = self._compiled_subprocess.run(
-                self._inference_state_id,
-                func,
-                args=args,
-                kwargs=kwargs,
-            )
-            # IMO it should be possible to create a hook in pickle.load to
-            # mess with the loaded objects. However it's extremely complicated
-            # to work around this so just do it with this call. ~ dave
-            return self._convert_access_handles(result)
+            pass
 
         return wrapper
 
     def _convert_access_handles(self, obj):
-        if isinstance(obj, SignatureParam):
-            return SignatureParam(*self._convert_access_handles(tuple(obj)))
-        elif isinstance(obj, tuple):
-            return tuple(self._convert_access_handles(o) for o in obj)
-        elif isinstance(obj, list):
-            return [self._convert_access_handles(o) for o in obj]
-        elif isinstance(obj, AccessHandle):
-            try:
-                # Rewrite the access handle to one we're already having.
-                obj = self.get_access_handle(obj.id)
-            except KeyError:
-                obj.add_subprocess(self)
-                self.set_access_handle(obj)
-        elif isinstance(obj, AccessPath):
-            return AccessPath(self._convert_access_handles(obj.accesses))
-        return obj
+        pass
 
     def __del__(self):
         if self._used and not self._compiled_subprocess.is_crashed:
@@ -284,16 +245,7 @@ class CompiledSubprocess:
 
     def run(self, inference_state_id, function, args=(), kwargs={}):
         # Delete old inference_states.
-        while True:
-            try:
-                delete_id = self._inference_state_deletion_queue.pop()
-            except IndexError:
-                break
-            else:
-                self._send(delete_id, None)
-
-        assert callable(function)
-        return self._send(inference_state_id, function, args, kwargs)
+        pass
 
     def get_sys_path(self):
         return self._send(None, functions.get_sys_path, (), {})
@@ -350,15 +302,7 @@ class CompiledSubprocess:
         Note: it is not guaranteed that the corresponding state will actually be
         deleted immediately.
         """
-        # Warning: if changing the semantics of context deletion see the comment
-        # in `InferenceStateSubprocess.__init__` regarding potential race
-        # conditions.
-
-        # Currently we are not deleting the related state instantly. They only
-        # get deleted once the subprocess is used again. It would probably a
-        # better solution to move all of this into a thread. However, the memory
-        # usage of a single inference_state shouldn't be that high.
-        self._inference_state_deletion_queue.append(inference_state_id)
+        pass
 
 
 class Listener:
@@ -475,7 +419,7 @@ class AccessHandle:
         self.id = id_
 
     def add_subprocess(self, subprocess):
-        self._subprocess = subprocess
+        pass
 
     def __repr__(self):
         try:
@@ -503,10 +447,8 @@ class AccessHandle:
         happen. They are also the only unhashable objects that we're passing
         around.
         """
-        if args and isinstance(args[0], slice):
-            return self._subprocess.get_compiled_method_return(self.id, name, *args, **kwargs)
-        return self._cached_results(name, *args, **kwargs)
+        pass
 
     @memoize_method
     def _cached_results(self, name, *args, **kwargs):
-        return self._subprocess.get_compiled_method_return(self.id, name, *args, **kwargs)
+        pass

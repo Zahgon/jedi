@@ -18,7 +18,7 @@ class _PluginManager:
         def decorator(callback):
             @wraps(callback)
             def wrapper(*args, **kwargs):
-                return built_functions[public_name](*args, **kwargs)
+                pass
 
             public_name = name or callback.__name__
 

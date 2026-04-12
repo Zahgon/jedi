@@ -61,28 +61,7 @@ def _limit_value_infers(func):
     I'm still not sure this is the way to go, but it looks okay for now and we
     can still go anther way in the future. Tests are there. ~ dave
     """
-    def wrapper(context, *args, **kwargs):
-        n = context.tree_node
-        inference_state = context.inference_state
-        try:
-            inference_state.inferred_element_counts[n] += 1
-            maximum = 300
-            if context.parent_context is None \
-                    and context.get_value() is inference_state.builtins_module:
-                # Builtins should have a more generous inference limit.
-                # It is important that builtins can be executed, otherwise some
-                # functions that depend on certain builtins features would be
-                # broken, see e.g. GH #1432
-                maximum *= 100
-
-            if inference_state.inferred_element_counts[n] > maximum:
-                debug.warning('In value %s there were too many inferences.', n)
-                return NO_VALUES
-        except KeyError:
-            inference_state.inferred_element_counts[n] = 1
-        return func(context, *args, **kwargs)
-
-    return wrapper
+    pass
 
 
 def infer_node(context, element):

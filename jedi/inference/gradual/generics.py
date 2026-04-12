@@ -32,7 +32,7 @@ class _AbstractGenericManager:
             return NO_VALUES
 
     def get_type_hint(self):
-        return '[%s]' % ', '.join(t.get_type_hint(add_class_info=False) for t in self.to_tuple())
+        pass
 
 
 class LazyGenericManager(_AbstractGenericManager):

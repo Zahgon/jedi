@@ -28,7 +28,7 @@ class FolderIO(AbstractFolderIO):
         return os.path.basename(self.path)
 
     def list(self):
-        return os.listdir(self.path)
+        pass
 
     def get_file_io(self, name):
         return FileIO(os.path.join(self.path, name))
@@ -69,10 +69,7 @@ class ZipFileIO(file_io.KnownContentFileIO, FileIOFolderMixin):
         self._zip_path = zip_path
 
     def get_last_modified(self):
-        try:
-            return os.path.getmtime(self._zip_path)
-        except (FileNotFoundError, PermissionError, NotADirectoryError):
-            return None
+        pass
 
 
 class FileIO(file_io.FileIO, FileIOFolderMixin):

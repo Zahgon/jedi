@@ -41,8 +41,7 @@ class ImplicitNamespaceValue(Value, SubModuleDictMixin):
     @property
     @inference_state_method_cache()
     def name(self):
-        string_name = self.py__package__()[-1]
-        return ImplicitNSName(self, string_name)
+        pass
 
     def py__file__(self) -> Optional[Path]:
         return None
@@ -50,7 +49,7 @@ class ImplicitNamespaceValue(Value, SubModuleDictMixin):
     def py__package__(self):
         """Return the fullname
         """
-        return self.string_names
+        pass
 
     def py__path__(self):
         return self._paths

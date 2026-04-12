@@ -172,16 +172,7 @@ class GenericClass(DefineGenericBaseClass, ClassMixin):
         return self._class_value
 
     def get_type_hint(self, add_class_info=True):
-        n = self.py__name__()
-        # Not sure if this is the best way to do this, but all of these types
-        # are a bit special in that they have type aliases and other ways to
-        # become lower case. It's probably better to make them upper case,
-        # because that's what you can use in annotations.
-        n = dict(list="List", dict="Dict", set="Set", tuple="Tuple").get(n, n)
-        s = n + self._generics_manager.get_type_hint()
-        if add_class_info:
-            return 'Type[%s]' % s
-        return s
+        pass
 
     def get_type_var_filter(self):
         return _TypeVarFilter(self.get_generics(), self.list_type_vars())
@@ -314,7 +305,7 @@ class _GenericInstanceWrapper(ValueWrapper):
         return self._wrapped_value.py__stop_iteration_returns()
 
     def get_type_hint(self, add_class_info=True):
-        return self._wrapped_value.class_value.get_type_hint(add_class_info=False)
+        pass
 
 
 class _PseudoTreeNameClass(Value):
@@ -338,7 +329,7 @@ class _PseudoTreeNameClass(Value):
 
     @property
     def tree_node(self):
-        return self._tree_name
+        pass
 
     def get_filters(self, *args, **kwargs):
         # TODO this is obviously wrong. Is it though?
@@ -361,7 +352,7 @@ class _PseudoTreeNameClass(Value):
 
     @property
     def name(self):
-        return ValueName(self, self._tree_name)
+        pass
 
     def get_qualified_names(self):
         return (self._tree_name.value,)
@@ -378,7 +369,7 @@ class BaseTypingValue(LazyValueWrapper):
 
     @property
     def name(self):
-        return ValueName(self, self._tree_name)
+        pass
 
     def _get_wrapped_value(self):
         return _PseudoTreeNameClass(self.parent_context, self._tree_name)
@@ -424,7 +415,7 @@ class BaseTypingInstance(LazyValueWrapper):
 
     @property
     def name(self):
-        return ValueName(self, self._tree_name)
+        pass
 
     def _get_wrapped_value(self):
         object_, = builtin_from_name(self.inference_state, 'object').execute_annotation()

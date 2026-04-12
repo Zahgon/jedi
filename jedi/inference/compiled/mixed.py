@@ -71,7 +71,7 @@ class MixedObject(ValueWrapper):
 
     @property
     def array_type(self):
-        return self.compiled_value.array_type
+        pass
 
     def get_key_values(self):
         return self.compiled_value.get_key_values()
@@ -101,7 +101,7 @@ class MixedObject(ValueWrapper):
 class MixedContext(CompiledContext, TreeContextMixin):
     @property
     def compiled_value(self):
-        return self._value.compiled_value
+        pass
 
 
 class MixedModuleContext(CompiledModuleContext, MixedContext):
@@ -118,11 +118,7 @@ class MixedName(NameWrapper):
 
     @property
     def start_pos(self):
-        values = list(self.infer())
-        if not values:
-            # This means a start_pos that doesn't exist (compiled objects).
-            return 0, 0
-        return values[0].name.start_pos
+        pass
 
     @memoize_method
     def infer(self):

@@ -35,20 +35,7 @@ MAX_PARAM_SEARCHES = 20
 
 
 def _avoid_recursions(func):
-    def wrapper(function_value, param_index):
-        inf = function_value.inference_state
-        with recursion.execution_allowed(inf, function_value.tree_node) as allowed:
-            # We need to catch recursions that may occur, because an
-            # anonymous functions can create an anonymous parameter that is
-            # more or less self referencing.
-            if allowed:
-                inf.dynamic_params_depth += 1
-                try:
-                    return func(function_value, param_index)
-                finally:
-                    inf.dynamic_params_depth -= 1
-            return NO_VALUES
-    return wrapper
+    pass
 
 
 @debug.increase_indent

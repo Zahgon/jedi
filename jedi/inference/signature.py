@@ -42,11 +42,11 @@ class AbstractSignature(_SignatureMixin):
 
     @property
     def name(self):
-        return self.value.name
+        pass
 
     @property
     def annotation_string(self):
-        return ''
+        pass
 
     def get_param_names(self, resolve_stars=False):
         param_names = self._function_value.get_param_names()
@@ -78,16 +78,11 @@ class TreeSignature(AbstractSignature):
     def _annotation(self):
         # Classes don't need annotations, even if __init__ has one. They always
         # return themselves.
-        if self.value.is_class():
-            return None
-        return self._function_value.tree_node.annotation
+        pass
 
     @property
     def annotation_string(self):
-        a = self._annotation
-        if a is None:
-            return ''
-        return a.get_code(include_prefix=False)
+        pass
 
     @memoize_method
     def get_param_names(self, resolve_stars=False):
@@ -128,13 +123,11 @@ class BuiltinSignature(AbstractSignature):
 
     @property
     def annotation_string(self):
-        return self._return_string
+        pass
 
     @property
     def _function_value(self):
-        if self.__function_value is None:
-            return self.value
-        return self.__function_value
+        pass
 
     def bind(self, value):
         return BuiltinSignature(

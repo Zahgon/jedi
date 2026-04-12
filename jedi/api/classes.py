@@ -32,7 +32,7 @@ from jedi.api.helpers import filter_follow_imports
 
 
 def _sort_names_by_start_pos(names):
-    return sorted(names, key=lambda s: s.start_pos or (0, 0))
+    pass
 
 
 def defined_names(inference_state, value):
@@ -42,13 +42,7 @@ def defined_names(inference_state, value):
     :type scope: Scope
     :rtype: list of Name
     """
-    try:
-        context = value.as_context()
-    except HasNoContext:
-        return []
-    filter = next(context.get_filters())
-    names = [name for name in filter.values()]
-    return [Name(inference_state, n) for n in _sort_names_by_start_pos(names)]
+    pass
 
 
 def _values_to_definitions(values):
@@ -98,14 +92,7 @@ class BaseName:
         """
         Shows the file path of a module. e.g. ``/usr/lib/python3.9/os.py``
         """
-        module = self._get_module_context()
-        if module.is_stub() or not module.is_compiled():
-            # Compiled modules should not return a module path even if they
-            # have one.
-            path: Optional[Path] = self._get_module_context().py__file__()
-            return path
-
-        return None
+        pass
 
     @property
     def name(self):
@@ -116,7 +103,7 @@ class BaseName:
 
         :rtype: str or None
         """
-        return self._name.get_public_name()
+        pass
 
     @property
     def type(self):
@@ -175,19 +162,7 @@ class BaseName:
         ``param``, ``path``, ``keyword``, ``property`` and ``statement``.
 
         """
-        tree_name = self._name.tree_name
-        resolve = False
-        if tree_name is not None:
-            # TODO move this to their respective names.
-            definition = tree_name.get_definition()
-            if definition is not None and definition.type == 'import_from' and \
-                    tree_name.is_definition():
-                resolve = True
-
-        if isinstance(self._name, SubModuleName) or resolve:
-            for value in self._name.infer():
-                return value.api_type
-        return self._name.api_type
+        pass
 
     @property
     def module_name(self):
@@ -202,7 +177,7 @@ class BaseName:
         >>> print(d.module_name)  # doctest: +ELLIPSIS
         json
         """
-        return self._get_module_context().py__name__()
+        pass
 
     def in_builtin_module(self):
         """
@@ -216,18 +191,12 @@ class BaseName:
     @property
     def line(self):
         """The line where the definition occurs (starting with 1)."""
-        start_pos = self._name.start_pos
-        if start_pos is None:
-            return None
-        return start_pos[0]
+        pass
 
     @property
     def column(self):
         """The column where the definition occurs (starting with 0)."""
-        start_pos = self._name.start_pos
-        if start_pos is None:
-            return None
-        return start_pos[1]
+        pass
 
     def get_definition_start_position(self):
         """
@@ -236,12 +205,7 @@ class BaseName:
 
         :rtype: Optional[Tuple[int, int]]
         """
-        if self._name.tree_name is None:
-            return None
-        definition = self._name.tree_name.get_definition()
-        if definition is None:
-            return self._name.start_pos
-        return definition.start_pos
+        pass
 
     def get_definition_end_position(self):
         """
@@ -250,17 +214,7 @@ class BaseName:
 
         :rtype: Optional[Tuple[int, int]]
         """
-        if self._name.tree_name is None:
-            return None
-        definition = self._name.tree_name.get_definition()
-        if definition is None:
-            return self._name.tree_name.end_pos
-        if self.type in ("function", "class"):
-            last_leaf = definition.get_last_leaf()
-            if last_leaf.type == "newline":
-                return last_leaf.get_previous_leaf().end_pos
-            return last_leaf.end_pos
-        return definition.end_pos
+        pass
 
     def docstring(self, raw=False, fast=True):
         r"""
@@ -343,25 +297,7 @@ class BaseName:
         'class C'
 
         """
-        typ = self.type
-        tree_name = self._name.tree_name
-        if typ == 'param':
-            return typ + ' ' + self._name.to_string()
-        if typ in ('function', 'class', 'module', 'instance') or tree_name is None:
-            if typ == 'function':
-                # For the description we want a short and a pythonic way.
-                typ = 'def'
-            return typ + ' ' + self._name.get_public_name()
-
-        definition = tree_name.get_definition(include_setitem=True) or tree_name
-        # Remove the prefix, because that's not what we want for get_code
-        # here.
-        txt = definition.get_code(include_prefix=False)
-        # Delete comments:
-        txt = re.sub(r'#[^\n]+\n', ' ', txt)
-        # Delete multi spaces/newlines
-        txt = re.sub(r'\s+', ' ', txt).strip()
-        return txt
+        pass
 
     @property
     def full_name(self):
@@ -387,20 +323,7 @@ class BaseName:
         be ``<module 'posixpath' ...>```. However most users find the latter
         more practical.
         """
-        if not self._name.is_value_name:
-            return None
-
-        names = self._name.get_qualified_names(include_module_names=True)
-        if names is None:
-            return None
-
-        names = list(names)
-        try:
-            names[0] = self._mapping[names[0]]
-        except KeyError:
-            pass
-
-        return '.'.join(names)
+        pass
 
     def is_stub(self):
         """
@@ -416,10 +339,7 @@ class BaseName:
         Checks if a name is defined as ``self.foo = 3``. In case of self, this
         function would return False, for foo it would return True.
         """
-        tree_name = self._name.tree_name
-        if tree_name is None:
-            return False
-        return tree_name.is_definition() and tree_name.parent.type == 'trailer'
+        pass
 
     @debug.increase_indent_cm('goto on name')
     def goto(self, *, follow_imports=False, follow_builtin_imports=False,
@@ -538,17 +458,7 @@ class BaseName:
         :return str: Returns the line(s) of code or an empty string if it's a
                      builtin.
         """
-        if not self._name.is_value_name:
-            return ''
-
-        lines = self._name.get_root_context().code_lines
-        if lines is None:
-            # Probably a builtin module, just ignore in that case.
-            return ''
-
-        index = self._name.start_pos[0] - 1
-        start_index = max(index - before, 0)
-        return ''.join(lines[start_index:index + after + 1])
+        pass
 
     def _get_signatures(self, for_docstring=False):
         if self._name.api_type == 'property':
@@ -598,7 +508,7 @@ class BaseName:
 
         :rtype: str
         """
-        return self._name.infer().get_type_hint()
+        pass
 
 
 class Completion(BaseName):
@@ -668,7 +578,7 @@ class Completion(BaseName):
         ``name_with_symbols`` would be "param=".
 
         """
-        return self._complete(False)
+        pass
 
     def docstring(self, raw=False, fast=True):
         """
@@ -711,15 +621,7 @@ class Completion(BaseName):
         """
         Documented under :meth:`BaseName.type`.
         """
-        # Purely a speed optimization.
-        if self._cached_name is not None:
-            return completion_cache.get_type(
-                self._cached_name,
-                self._name.get_public_name(),
-                lambda: self._get_cache()
-            )
-
-        return super().type
+        pass
 
     def get_completion_prefix_length(self):
         """
@@ -737,7 +639,7 @@ class Completion(BaseName):
 
         completing ``foo(par`` would return 3.
         """
-        return self._like_name_length
+        pass
 
     def __repr__(self):
         return '<%s: %s>' % (type(self).__name__, self._name.get_public_name())
@@ -758,11 +660,7 @@ class Name(BaseName):
 
         :rtype: list of :class:`Name`
         """
-        defs = self._name.infer()
-        return sorted(
-            unite(defined_names(self._inference_state, d) for d in defs),
-            key=lambda s: s._name.start_pos or (0, 0)
-        )
+        pass
 
     def is_definition(self):
         """
@@ -804,8 +702,7 @@ class BaseSignature(Name):
 
         :rtype: list of :class:`.ParamName`
         """
-        return [ParamName(self._inference_state, n)
-                for n in self._signature.get_param_names(resolve_stars=True)]
+        pass
 
     def to_string(self):
         """
@@ -847,7 +744,7 @@ class Signature(BaseSignature):
 
         :rtype: int, int
         """
-        return self._call_details.bracket_leaf.start_pos
+        pass
 
     def __repr__(self):
         return '<%s: index=%r %s>' % (
@@ -864,7 +761,7 @@ class ParamName(Name):
 
         :rtype: list of :class:`.Name`
         """
-        return _values_to_definitions(self._name.infer_default())
+        pass
 
     def infer_annotation(self, **kwargs):
         """
@@ -890,4 +787,4 @@ class ParamName(Name):
 
         :rtype: :py:attr:`inspect.Parameter.kind`
         """
-        return self._name.get_kind()
+        pass

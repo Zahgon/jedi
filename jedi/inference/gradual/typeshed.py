@@ -95,39 +95,7 @@ def _cache_stub_file_map(version_info):
 
 def import_module_decorator(func):
     @wraps(func)
-    def wrapper(inference_state, import_names, parent_module_value, sys_path, prefer_stubs):
-        python_value_set = inference_state.module_cache.get(import_names)
-        if python_value_set is None:
-            if parent_module_value is not None and parent_module_value.is_stub():
-                parent_module_values = parent_module_value.non_stub_value_set
-            else:
-                parent_module_values = [parent_module_value]
-            if import_names == ('os', 'path'):
-                # This is a huge exception, we follow a nested import
-                # ``os.path``, because it's a very important one in Python
-                # that is being achieved by messing with ``sys.modules`` in
-                # ``os``.
-                python_value_set = ValueSet.from_sets(
-                    func(inference_state, (n,), None, sys_path,)
-                    for n in ['posixpath', 'ntpath', 'macpath', 'os2emxpath']
-                )
-            else:
-                python_value_set = ValueSet.from_sets(
-                    func(inference_state, import_names, p, sys_path,)
-                    for p in parent_module_values
-                )
-            inference_state.module_cache.add(import_names, python_value_set)
-
-        if not prefer_stubs or import_names[0] in settings.auto_import_modules:
-            return python_value_set
-
-        stub = try_to_load_stub_cached(inference_state, import_names, python_value_set,
-                                       parent_module_value, sys_path)
-        if stub is not None:
-            return ValueSet([stub])
-        return python_value_set
-
-    return wrapper
+    pass
 
 
 def try_to_load_stub_cached(inference_state, import_names, *args, **kwargs):

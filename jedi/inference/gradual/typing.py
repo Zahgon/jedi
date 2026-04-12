@@ -196,7 +196,7 @@ class _TypingClassMixin(ClassMixin):
 
     @property
     def name(self):
-        return ValueName(self, self._tree_name)
+        pass
 
 
 class TypingClassWithGenerics(ProxyWithGenerics, _TypingClassMixin):
@@ -249,7 +249,7 @@ class TypeAlias(LazyValueWrapper):
 
     @property
     def name(self):
-        return ValueName(self, self._origin_tree_name)
+        pass
 
     def py__name__(self):
         return self.name.string_name
@@ -336,7 +336,7 @@ class Tuple(BaseTypingInstance):
 
     @property
     def name(self):
-        return self._wrapped_value.name
+        pass
 
     def infer_type_vars(self, value_set):
         # Circular
@@ -431,8 +431,7 @@ class NewType(Value):
 
     @property
     def name(self):
-        from jedi.inference.compiled.value import CompiledValueName
-        return CompiledValueName(self, 'NewType')
+        pass
 
     def __repr__(self) -> str:
         return '<NewType: %s>%s' % (self.tree_node, self._type_value_set)
@@ -461,7 +460,7 @@ class TypedDict(LazyValueWrapper):
 
     @property
     def name(self):
-        return ValueName(self, self.tree_node.name)
+        pass
 
     def py__simple_getitem__(self, index):
         if isinstance(index, str):

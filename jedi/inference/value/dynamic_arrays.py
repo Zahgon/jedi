@@ -125,9 +125,7 @@ def _internal_check_array_additions(context, sequence):
 
 def get_dynamic_array_instance(instance, arguments):
     """Used for set() and list() instances."""
-    ai = _DynamicArrayAdditions(instance, arguments)
-    from jedi.inference import arguments
-    return arguments.ValuesArguments([ValueSet([ai])])
+    pass
 
 
 class _DynamicArrayAdditions(HelperValueMixin):

@@ -22,37 +22,7 @@ def get_executable_nodes(node, last_added=False):
     """
     For static analysis.
     """
-    result = []
-    typ = node.type
-    if typ == 'name':
-        next_leaf = node.get_next_leaf()
-        if last_added is False and node.parent.type != 'param' and next_leaf != '=':
-            result.append(node)
-    elif typ == 'expr_stmt':
-        # I think inferring the statement (and possibly returned arrays),
-        # should be enough for static analysis.
-        result.append(node)
-        for child in node.children:
-            result += get_executable_nodes(child, last_added=True)
-    elif typ == 'decorator':
-        # decorator
-        if node.children[-2] == ')':
-            node = node.children[-3]
-            if node != '(':
-                result += get_executable_nodes(node)
-    else:
-        try:
-            children = node.children
-        except AttributeError:
-            pass
-        else:
-            if node.type in _EXECUTE_NODES and not last_added:
-                result.append(node)
-
-            for child in children:
-                result += get_executable_nodes(child, last_added)
-
-    return result
+    pass
 
 
 def get_sync_comp_fors(comp_for):
@@ -217,19 +187,7 @@ def _get_parent_scope_cache(func):
     cache = WeakKeyDictionary()
 
     def wrapper(parso_cache_node, node, include_flows=False):
-        if parso_cache_node is None:
-            return func(node, include_flows)
-
-        try:
-            for_module = cache[parso_cache_node]
-        except KeyError:
-            for_module = cache[parso_cache_node] = {}
-
-        try:
-            return for_module[node]
-        except KeyError:
-            result = for_module[node] = func(node, include_flows)
-            return result
+        pass
     return wrapper
 
 
@@ -328,11 +286,7 @@ def _function_is_x_method(decorator_checker):
         staticmethod/classmethod are builtins and unless overwritten, this will
         be correct.
         """
-        for decorator in function_node.get_decorators():
-            dotted_name = decorator.children[1]
-            if decorator_checker(dotted_name.get_code()):
-                return True
-        return False
+        pass
     return wrapper
 
 

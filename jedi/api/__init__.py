@@ -351,7 +351,7 @@ class Script:
             that e.g. ``ooa`` will match ``foobar``.
         :yields: :class:`.Completion`
         """
-        return self._search_func(string, complete=True, **kwargs)
+        pass
 
     @validate_line_column
     def help(self, line=None, column=None):
@@ -368,34 +368,7 @@ class Script:
 
         :rtype: list of :class:`.Name`
         """
-        self._inference_state.reset_recursion_limitations()
-        definitions = self.goto(line, column, follow_imports=True)
-        if definitions:
-            return definitions
-        leaf = self._module_node.get_leaf_for_position((line, column))
-
-        if leaf is not None and leaf.end_pos == (line, column) and leaf.type == 'newline':
-            next_ = leaf.get_next_leaf()
-            if next_ is not None and next_.start_pos == leaf.end_pos:
-                leaf = next_
-
-        if leaf is not None and leaf.type in ('keyword', 'operator', 'error_leaf'):
-            def need_pydoc():
-                if leaf.value in ('(', ')', '[', ']'):
-                    if leaf.parent.type == 'trailer':
-                        return False
-                    if leaf.parent.type == 'atom':
-                        return False
-                grammar = self._inference_state.grammar
-                # This parso stuff is not public, but since I control it, this
-                # is fine :-) ~dave
-                reserved = grammar._pgen_grammar.reserved_syntax_strings.keys()
-                return leaf.value in reserved
-
-            if need_pydoc():
-                name = KeywordName(self._inference_state, leaf.value)
-                return [classes.Name(self._inference_state, name)]
-        return []
+        pass
 
     @validate_line_column
     def get_references(self, line=None, column=None, **kwargs):
@@ -474,72 +447,10 @@ class Script:
 
         :rtype: :class:`.Name`
         """
-        pos = (line, column)
-        leaf = self._module_node.get_leaf_for_position(pos, include_prefixes=True)
-        if leaf.start_pos > pos or leaf.type == 'endmarker':
-            previous_leaf = leaf.get_previous_leaf()
-            if previous_leaf is not None:
-                leaf = previous_leaf
-
-        module_context = self._get_module_context()
-
-        n = leaf.search_ancestor('funcdef', 'classdef')
-        if n is not None and n.start_pos < pos <= n.children[-1].start_pos:
-            # This is a bit of a special case. The context of a function/class
-            # name/param/keyword is always it's parent context, not the
-            # function itself. Catch all the cases here where we are before the
-            # suite object, but still in the function.
-            context = module_context.create_value(n).as_context()
-        else:
-            context = module_context.create_context(leaf)
-
-        while context.name is None:
-            context = context.parent_context  # comprehensions
-
-        definition = classes.Name(self._inference_state, context.name)
-        while definition.type != 'module':
-            name = definition._name  # TODO private access
-            tree_name = name.tree_name
-            if tree_name is not None:  # Happens with lambdas.
-                scope = tree_name.get_definition()
-                if scope.start_pos[1] < column:
-                    break
-            definition = definition.parent()
-        return definition
+        pass
 
     def _analysis(self):
-        self._inference_state.is_analysis = True
-        self._inference_state.analysis_modules = [self._module_node]
-        module = self._get_module_context()
-        try:
-            for node in get_executable_nodes(self._module_node):
-                context = module.create_context(node)
-                if node.type in ('funcdef', 'classdef'):
-                    # Resolve the decorators.
-                    tree_name_to_values(self._inference_state, context, node.children[1])
-                elif isinstance(node, tree.Import):
-                    import_names = set(node.get_defined_names())
-                    if node.is_nested():
-                        import_names |= set(path[-1] for path in node.get_paths())
-                    for n in import_names:
-                        imports.infer_import(context, n)
-                elif node.type == 'expr_stmt':
-                    types = context.infer_node(node)
-                    for testlist in node.children[:-1:2]:
-                        # Iterate tuples.
-                        unpack_tuple_to_dict(context, types, testlist)
-                else:
-                    if node.type == 'name':
-                        defs = self._inference_state.infer(context, node)
-                    else:
-                        defs = infer_call_of_leaf(context, node)
-                    try_iter_content(defs)
-                self._inference_state.reset_recursion_limitations()
-
-            ana = [a for a in self._inference_state.analysis if self.path == a.path]
-            return sorted(set(ana), key=lambda x: x.line)
-        finally:
-            self._inference_state.is_analysis = False
+        pass
 
     def get_names(self, **kwargs):
         """
@@ -562,7 +473,7 @@ class Script:
 
         :rtype: list of :class:`.SyntaxError`
         """
-        return parso_to_jedi_errors(self._inference_state.grammar, self._module_node)
+        pass
 
     def _names(self, all_scopes=False, definitions=True, references=False):
         self._inference_state.reset_recursion_limitations()
@@ -588,8 +499,7 @@ class Script:
         :raises: :exc:`.RefactoringError`
         :rtype: :class:`.Refactoring`
         """
-        definitions = self.get_references(line, column, include_builtins=False)
-        return refactoring.rename(self._inference_state, definitions, new_name)
+        pass
 
     @validate_line_column
     def extract_variable(self, line, column, *, new_name, until_line=None, until_column=None):
@@ -617,18 +527,7 @@ class Script:
         :raises: :exc:`.RefactoringError`
         :rtype: :class:`.Refactoring`
         """
-        if until_line is None and until_column is None:
-            until_pos = None
-        else:
-            if until_line is None:
-                until_line = line
-            if until_column is None:
-                until_column = len(self._code_lines[until_line - 1])
-            until_pos = until_line, until_column
-        return extract_variable(
-            self._inference_state, self.path, self._module_node,
-            new_name, (line, column), until_pos
-        )
+        pass
 
     @validate_line_column
     def extract_function(self, line, column, *, new_name, until_line=None, until_column=None):
@@ -664,18 +563,7 @@ class Script:
         :raises: :exc:`.RefactoringError`
         :rtype: :class:`.Refactoring`
         """
-        if until_line is None and until_column is None:
-            until_pos = None
-        else:
-            if until_line is None:
-                until_line = line
-            if until_column is None:
-                until_column = len(self._code_lines[until_line - 1])
-            until_pos = until_line, until_column
-        return extract_function(
-            self._inference_state, self.path, self._get_module_context(),
-            new_name, (line, column), until_pos
-        )
+        pass
 
     def inline(self, line=None, column=None):
         """
@@ -694,8 +582,7 @@ class Script:
         :raises: :exc:`.RefactoringError`
         :rtype: :class:`.Refactoring`
         """
-        names = [d._name for d in self.get_references(line, column, include_builtins=True)]
-        return refactoring.inline(self._inference_state, names)
+        pass
 
 
 class Interpreter(Script):
@@ -778,9 +665,7 @@ def preload_module(*modules):
 
     :param modules: different module names, list of string.
     """
-    for m in modules:
-        s = "import %s as x; x." % m
-        Script(s).complete(1, len(s))
+    pass
 
 
 def set_debug_function(func_cb=debug.print_to_stdout, warnings=True,

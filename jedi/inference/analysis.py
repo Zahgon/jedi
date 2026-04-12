@@ -37,17 +37,16 @@ class Error:
 
     @property
     def line(self):
-        return self._start_pos[0]
+        pass
 
     @property
     def column(self):
-        return self._start_pos[1]
+        pass
 
     @property
     def code(self):
         # The class name start
-        first = self.__class__.__name__[0]
-        return first + str(CODES[self.name][0])
+        pass
 
     def __str__(self):
         return '%s:%s:%s: %s %s' % (self.path, self.line, self.column,

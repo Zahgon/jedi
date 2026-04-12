@@ -86,9 +86,7 @@ class TypeVar(BaseTypingValue):
 
     @property
     def constraints(self):
-        return ValueSet.from_sets(
-            lazy.infer() for lazy in self._constraints_lazy_values
-        )
+        pass
 
     def define_generics(self, type_var_dict):
         try:

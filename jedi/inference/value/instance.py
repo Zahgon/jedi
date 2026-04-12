@@ -135,7 +135,7 @@ class AbstractInstanceValue(Value):
         )
 
     def get_type_hint(self, add_class_info=True):
-        return self.py__name__()
+        pass
 
     def py__getitem__(self, index_value_set, contextualized_node):
         names = self.get_function_slot_names('__getitem__')
@@ -180,7 +180,7 @@ class CompiledInstance(AbstractInstanceValue):
 
     @property
     def name(self):
-        return compiled.CompiledValueName(self, self.class_value.name.string_name)
+        pass
 
     def is_stub(self):
         return False
@@ -189,15 +189,11 @@ class CompiledInstance(AbstractInstanceValue):
 class _BaseTreeInstance(AbstractInstanceValue):
     @property
     def array_type(self):
-        name = self.class_value.py__name__()
-        if name in ['list', 'set', 'dict'] \
-                and self.parent_context.get_root_context().is_builtins_module():
-            return name
-        return None
+        pass
 
     @property
     def name(self):
-        return ValueName(self, self.class_value.name.tree_name)
+        pass
 
     def get_filters(self, origin_scope=None, include_self_names=True):
         class_value = self.get_annotated_class_object()
@@ -224,19 +220,7 @@ class _BaseTreeInstance(AbstractInstanceValue):
 
     @inference_state_method_cache()
     def create_instance_context(self, class_context, node):
-        new = node
-        while True:
-            func_node = new
-            new = new.search_ancestor('funcdef', 'classdef')
-            if class_context.tree_node is new:
-                func = FunctionValue.from_context(class_context, func_node)
-                bound_method = BoundMethod(self, class_context, func)
-                if func_node.name.value == '__init__':
-                    context = bound_method.as_context(self._arguments)
-                else:
-                    context = bound_method.as_context()
-                break
-        return context.create_context(node)
+        pass
 
     def py__getattribute__alternatives(self, string_name):
         '''
@@ -431,10 +415,7 @@ class BoundMethod(FunctionMixin, ValueWrapper):
 
     @property
     def name(self):
-        return FunctionNameInClass(
-            self._class_context,
-            super().name
-        )
+        pass
 
     def py__class__(self):
         c, = values_from_qualified_names(self.inference_state, 'types', 'MethodType')
@@ -490,7 +471,7 @@ class SelfName(TreeNameDefinition):
 
     @property
     def parent_context(self):
-        return self._instance.create_instance_context(self.class_context, self.tree_name)
+        pass
 
     def get_defining_qualified_value(self):
         return self._instance

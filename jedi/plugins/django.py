@@ -164,39 +164,13 @@ def is_django_model_base(value):
 
 def get_metaclass_filters(func):
     def wrapper(cls, metaclasses, is_instance):
-        for metaclass in metaclasses:
-            if is_django_model_base(metaclass):
-                return [_new_dict_filter(cls, is_instance)]
-
-        return func(cls, metaclasses, is_instance)
+        pass
     return wrapper
 
 
 def tree_name_to_values(func):
     def wrapper(inference_state, context, tree_name):
-        result = func(inference_state, context, tree_name)
-        if tree_name.value in _FILTER_LIKE_METHODS:
-            # Here we try to overwrite stuff like User.objects.filter. We need
-            # this to make sure that keyword param completion works on these
-            # kind of methods.
-            for v in result:
-                if v.get_qualified_names() == ('_BaseQuerySet', tree_name.value) \
-                        and v.parent_context.is_module() \
-                        and v.parent_context.py__name__() == 'django.db.models.query':
-                    qs = context.get_value()
-                    generics = qs.get_generics()
-                    if len(generics) >= 1:
-                        return ValueSet(QuerySetMethodWrapper(v, model)
-                                        for model in generics[0])
-
-        elif tree_name.value == 'BaseManager' and context.is_module() \
-                and context.py__name__() == 'django.db.models.manager':
-            return ValueSet(ManagerWrapper(r) for r in result)
-
-        elif tree_name.value == 'Field' and context.is_module() \
-                and context.py__name__() == 'django.db.models.fields':
-            return ValueSet(FieldWrapper(r) for r in result)
-        return result
+        pass
     return wrapper
 
 
@@ -214,10 +188,7 @@ def _get_signatures(cls):
 
 def get_metaclass_signatures(func):
     def wrapper(cls, metaclasses):
-        for metaclass in metaclasses:
-            if is_django_model_base(metaclass):
-                return _get_signatures(cls)
-        return func(cls, metaclass)
+        pass
     return wrapper
 
 

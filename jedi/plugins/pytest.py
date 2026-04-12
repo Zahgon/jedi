@@ -21,95 +21,26 @@ def execute(callback):
     def wrapper(value, arguments):
         # This might not be necessary anymore in pytest 4/5, definitely needed
         # for pytest 3.
-        if value.py__name__() == 'fixture' \
-                and value.parent_context.py__name__() == '_pytest.fixtures':
-            return NO_VALUES
-
-        return callback(value, arguments)
+        pass
     return wrapper
 
 
 def infer_anonymous_param(func):
-    def get_returns(value):
-        if value.tree_node.annotation is not None:
-            result = value.execute_with_values()
-            if any(v.name.get_qualified_names(include_module_names=True)
-                   == ('typing', 'Generator')
-                   for v in result):
-                return ValueSet.from_sets(
-                    v.py__getattribute__('__next__').execute_annotation()
-                    for v in result
-                )
-            return result
-
-        # In pytest we need to differentiate between generators and normal
-        # returns.
-        # Parameters still need to be anonymous, .as_context() ensures that.
-        function_context = value.as_context()
-        if function_context.is_generator():
-            return function_context.merge_yield_values()
-        else:
-            return function_context.get_return_values()
-
-    def wrapper(param_name):
-        # parameters with an annotation do not need special handling
-        if param_name.annotation_node:
-            return func(param_name)
-        is_pytest_param, param_name_is_function_name = \
-            _is_a_pytest_param_and_inherited(param_name)
-        if is_pytest_param:
-            module = param_name.get_root_context()
-            fixtures = _goto_pytest_fixture(
-                module,
-                param_name.string_name,
-                # This skips the current module, because we are basically
-                # inheriting a fixture from somewhere else.
-                skip_own_module=param_name_is_function_name,
-            )
-            if fixtures:
-                return ValueSet.from_sets(
-                    get_returns(value)
-                    for fixture in fixtures
-                    for value in fixture.infer()
-                )
-        return func(param_name)
-    return wrapper
+    pass
 
 
 def goto_anonymous_param(func):
-    def wrapper(param_name):
-        is_pytest_param, param_name_is_function_name = \
-            _is_a_pytest_param_and_inherited(param_name)
-        if is_pytest_param:
-            names = _goto_pytest_fixture(
-                param_name.get_root_context(),
-                param_name.string_name,
-                skip_own_module=param_name_is_function_name,
-            )
-            if names:
-                return names
-        return func(param_name)
-    return wrapper
+    pass
 
 
 def complete_param_names(func):
     def wrapper(context, func_name, decorator_nodes):
-        module_context = context.get_root_context()
-        if _is_pytest_func(func_name, decorator_nodes):
-            names = []
-            for module_context in _iter_pytest_modules(module_context):
-                names += FixtureFilter(module_context).values()
-            if names:
-                return names
-        return func(context, func_name, decorator_nodes)
+        pass
     return wrapper
 
 
 def _goto_pytest_fixture(module_context, name, skip_own_module):
-    for module_context in _iter_pytest_modules(module_context, skip_own_module=skip_own_module):
-        names = FixtureFilter(module_context).get(name)
-        if names:
-            return names
+    pass
 
 
 def _is_a_pytest_param_and_inherited(param_name):
@@ -119,12 +50,7 @@ def _is_a_pytest_param_and_inherited(param_name):
 
     This is a heuristic and will work in most cases.
     """
-    funcdef = param_name.tree_name.search_ancestor('funcdef')
-    if funcdef is None:  # A lambda
-        return False, False
-    decorators = funcdef.get_decorators()
-    return _is_pytest_func(funcdef.name.value, decorators), \
-        funcdef.name.value == param_name.string_name
+    pass
 
 
 def _is_pytest_func(func_name, decorator_nodes):

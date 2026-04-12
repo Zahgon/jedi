@@ -28,20 +28,7 @@ def clear_time_caches(delete_all: bool = False) -> None:
     :param delete_all: Deletes also the cache that is normally not deleted,
         like parser cache, which is important for faster parsing.
     """
-    global _time_caches  # noqa: F824
-
-    if delete_all:
-        for cache in _time_caches.values():
-            cache.clear()
-        parser_cache.clear()
-    else:
-        # normally just kill the expired entries, not all
-        for tc in _time_caches.values():
-            # check time_cache for expired entries
-            for key, (t, value) in list(tc.items()):
-                if t < time.time():
-                    # delete expired entries
-                    del tc[key]
+    pass
 
 
 def signature_time_cache(time_add_setting):
@@ -54,25 +41,7 @@ def signature_time_cache(time_add_setting):
     If the given key is None, the function will not be cached.
     """
     def _temp(key_func):
-        dct = {}
-        _time_caches[time_add_setting] = dct
-
-        def wrapper(*args, **kwargs):
-            generator = key_func(*args, **kwargs)
-            key = next(generator)
-            try:
-                expiry, value = dct[key]
-                if expiry > time.time():
-                    return value
-            except KeyError:
-                pass
-
-            value = next(generator)
-            time_add = getattr(settings, time_add_setting)
-            if key is not None:
-                dct[key] = time.time() + time_add, value
-            return value
-        return wrapper
+        pass
     return _temp
 
 
@@ -82,16 +51,7 @@ def time_cache(seconds):
 
         @wraps(func)
         def wrapper(*args, **kwargs):
-            key = (args, frozenset(kwargs.items()))
-            try:
-                created, result = cache[key]
-                if time.time() < created + seconds:
-                    return result
-            except KeyError:
-                pass
-            result = func(*args, **kwargs)
-            cache[key] = time.time(), result
-            return result
+            pass
 
         wrapper.clear_cache = lambda: cache.clear()
         return wrapper
@@ -101,15 +61,4 @@ def time_cache(seconds):
 
 def memoize_method(method):
     """A normal memoize function."""
-    @wraps(method)
-    def wrapper(self, *args, **kwargs):
-        cache_dict = self.__dict__.setdefault('_memoize_method_dct', {})
-        dct = cache_dict.setdefault(method, {})
-        key = (args, frozenset(kwargs.items()))
-        try:
-            return dct[key]
-        except KeyError:
-            result = method(self, *args, **kwargs)
-            dct[key] = result
-            return result
-    return wrapper
+    pass

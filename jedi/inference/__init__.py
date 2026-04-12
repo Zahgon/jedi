@@ -125,15 +125,12 @@ class InferenceState:
     @property
     @inference_state_function_cache()
     def builtins_module(self):
-        module_name = 'builtins'
-        builtins_module, = self.import_module((module_name,), sys_path=[])
-        return builtins_module
+        pass
 
     @property
     @inference_state_function_cache()
     def typing_module(self):
-        typing_module, = self.import_module(('typing',))
-        return typing_module
+        pass
 
     def reset_recursion_limitations(self):
         self.recursion_detector = recursion.RecursionDetector()

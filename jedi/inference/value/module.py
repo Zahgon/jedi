@@ -83,7 +83,7 @@ class ModuleMixin(SubModuleDictMixin):
     @property
     @inference_state_method_cache()
     def name(self):
-        return self._module_name_class(self, self.string_names[-1])
+        pass
 
     @inference_state_method_cache()
     def _module_attributes_dict(self):
@@ -179,12 +179,7 @@ class ModuleValue(ModuleMixin, TreeValue):
         return self._is_package
 
     def py__package__(self):
-        if self.string_names is None:
-            return []
-
-        if self._is_package:
-            return self.string_names
-        return self.string_names[:-1]
+        pass
 
     def py__path__(self):
         """

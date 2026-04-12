@@ -16,9 +16,4 @@ def monkeypatch(obj, attribute_name, new_value):
 
 def indent_block(text, indention='    '):
     """This function indents a text block with a default of four spaces."""
-    temp = ''
-    while text and text[-1] == '\n':
-        temp += text[-1]
-        text = text[:-1]
-    lines = text.split('\n')
-    return '\n'.join(map(lambda s: indention + s, lines)) + temp
+    pass

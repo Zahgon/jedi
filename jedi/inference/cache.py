@@ -23,27 +23,7 @@ def _memoize_default(default=_NO_DEFAULT, inference_state_is_first_arg=False,
     def func(function):
         def wrapper(obj, *args, **kwargs):
             # TODO These checks are kind of ugly and slow.
-            if inference_state_is_first_arg:
-                cache = obj.memoize_cache
-            elif second_arg_is_inference_state:
-                cache = args[0].memoize_cache  # needed for meta classes
-            else:
-                cache = obj.inference_state.memoize_cache
-
-            try:
-                memo = cache[function]
-            except KeyError:
-                cache[function] = memo = {}
-
-            key = (obj, args, frozenset(kwargs.items()))
-            if key in memo:
-                return memo[key]
-            else:
-                if default is not _NO_DEFAULT:
-                    memo[key] = default
-                rv = function(obj, *args, **kwargs)
-                memo[key] = rv
-                return rv
+            pass
         return wrapper
 
     return func
@@ -89,38 +69,7 @@ def inference_state_method_generator_cache():
     def func(function):
         @wraps(function)
         def wrapper(obj, *args, **kwargs):
-            cache = obj.inference_state.memoize_cache
-            try:
-                memo = cache[function]
-            except KeyError:
-                cache[function] = memo = {}
-
-            key = (obj, args, frozenset(kwargs.items()))
-
-            if key in memo:
-                actual_generator, cached_lst = memo[key]
-            else:
-                actual_generator = function(obj, *args, **kwargs)
-                cached_lst = []
-                memo[key] = actual_generator, cached_lst
-
-            i = 0
-            while True:
-                try:
-                    next_element = cached_lst[i]
-                    if next_element is _RECURSION_SENTINEL:
-                        debug.warning('Found a generator recursion for %s' % obj)
-                        # This means we have hit a recursion.
-                        return
-                except IndexError:
-                    cached_lst.append(_RECURSION_SENTINEL)
-                    next_element = next(actual_generator, None)
-                    if next_element is None:
-                        cached_lst.pop()
-                        return
-                    cached_lst[-1] = next_element
-                yield next_element
-                i += 1
+            pass
         return wrapper
 
     return func

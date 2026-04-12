@@ -15,9 +15,7 @@ class Unpickler(pickle.Unpickler):
         # pickles from 3.13 on older version of Python. Since 3.13 maintained a
         # compatible API, pickles from older Python work natively on the newer
         # version.
-        if module == 'pathlib._local':
-            module = 'pathlib'
-        return super().find_class(module, name)
+        pass
 
 
 def pickle_load(file):

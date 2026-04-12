@@ -69,17 +69,12 @@ _start_time = time.time()
 
 
 def reset_time():
-    global _start_time, _debug_indent
-    _start_time = time.time()
-    _debug_indent = 0
+    pass
 
 
 def increase_indent(func):
     """Decorator for makin """
-    def wrapper(*args, **kwargs):
-        with increase_indent_cm():
-            return func(*args, **kwargs)
-    return wrapper
+    pass
 
 
 @contextmanager
@@ -127,6 +122,4 @@ def print_to_stdout(color, str_out):
 
     :param str color: A string that is an attribute of ``colorama.Fore``.
     """
-    col = getattr(Fore, color)
-    _lazy_colorama_init()
-    print(col + str_out + Fore.RESET)
+    pass
